@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.io.FileWriter;
 
 public class MessageEngine {
 	
@@ -16,7 +17,7 @@ public class MessageEngine {
 		}
 
 
-		int port = 56827;
+		int port = 55935;
 
 		try (ServerSocket serverSocket = new ServerSocket(port);){
 
@@ -32,20 +33,27 @@ public class MessageEngine {
 
 
 
-
+				//Reading input from client
 				BufferedReader in = new BufferedReader(
                         new InputStreamReader(clientSocket.getInputStream()));
+
+
+				//Sending info to client
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
+
                 // Receive a message from the client
-                String message = in.readLine();
+                String message = in.readLine(); //Waits for new line
                 System.out.println("Received from client: " + message);
 
+
+				//Writes message from client to txt file
+				FileWriter writer = new FileWriter("Recieved.txt");
+				writer.write(message);
+				writer.close();
+
                 // Send a response
-                out.println("I AM SERVER");
-
-
-
+                //out.println("I AM SERVER");
 
 				clientSocket.close();
 			}
