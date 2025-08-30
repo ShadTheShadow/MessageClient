@@ -13,28 +13,30 @@ public class ClientEngine {
 	
 	public static void main(String[] args) {
 		//System.out.print("Sending to: " + args[0] + " | Message: " + args[1] + "\n");
-		String address;
-		String endAddress = "192.168.0.194";
-		final int PORT = 56827;
+		String localAddress;
+		String endAddress = "kronkserver.tplinkdns.com";
+		final int PORT = 55935;
 		try {
-		address = InetAddress.getLocalHost().getHostAddress();
-		System.out.println("Local Addy: " + address);
+		endAddress = InetAddress.getByName(endAddress).getHostAddress().toString();
+		//endAddress = "192.168.0.12";
+		localAddress = InetAddress.getLocalHost().getHostAddress();
+		System.out.println("Local Address: " + localAddress);
 		} catch(Exception ex) {
 			System.out.println("Unable to determine address!");
 			return;
 		}
+		System.out.println(endAddress); // Test to see end add
+		Socket server = connectSocket(endAddress, PORT);
 		
-		Socket evan = connectSocket(endAddress, PORT);
+		if(server == null) {
+			System.out.println("No connection, terminating!");
+			return;
+		}
 		
 		try {
-		PrintWriter output = new PrintWriter(evan.getOutputStream(), true);
+		PrintWriter output = new PrintWriter(server.getOutputStream(), true);
 		
 		output.println("balls");
-		
-		
-		while(evan != null) {
-			output.println("balls");
-		}
 		
 		} catch (Exception ex) {
 			System.out.println(ex);
