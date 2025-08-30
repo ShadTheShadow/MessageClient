@@ -70,7 +70,7 @@ public class ClientEngine {
 	public static void main(String[] args) {
 		String localAddress;
 		String endAddress = "kronkserver.tplinkdns.com";
-		String message;
+		String message = "";
 		Scanner in = new Scanner(System.in);
 		final int PORT = 55935;
 		try {
@@ -80,18 +80,27 @@ public class ClientEngine {
 			System.out.println("End address: " + endAddress);
 		} catch (Exception ex) {
 			System.out.println("Unable to determine address!");
+			in.close();
 			return;
 		}
+		
+		boolean exit = false;
 
-		System.out.println("Please enter a message:");
-		message = in.nextLine();
-		System.out.println("Message to send: " + message); // Echos message to be sent
-
-		while (!message.equals(":exit")) {
+		while (!exit) {
 			
+			System.out.println("Please enter a message or type :exit to close:");
 			message = in.nextLine();
-			sendMessage(endAddress, PORT, message);
+			if(message.equals(":exit")) {
+				exit = true;
+				System.out.println("Exiting!");
+			} else {
+				System.out.println("Message to send: " + message); // Echos message to be sent
+				sendMessage(endAddress, PORT, message);
+			}
+			
 		}
+		
+		in.close();
 
 	}
 }
