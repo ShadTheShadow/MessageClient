@@ -1,5 +1,7 @@
 import java.net.Socket; // for client side interactions
 import java.net.SocketAddress;
+import java.util.Scanner;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -8,6 +10,31 @@ import java.net.InetSocketAddress;
  * TODO write header
  */
 public class ClientEngine {
+
+	public static void sendMessage(String endAddress, int PORT, String message) {
+		Socket server = connectSocket(endAddress, PORT);
+		if (server == null) {
+			System.out.println("No connection! Could the port be blocked?");
+			return;
+		}
+
+		try {
+			PrintWriter output = new PrintWriter(server.getOutputStream(), true);
+
+			output.println(message);
+			output.close();
+
+		} catch (Exception ex) {
+			System.out.println(ex);
+		}
+		
+		try {
+			server.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * TODO write header
@@ -43,30 +70,28 @@ public class ClientEngine {
 	public static void main(String[] args) {
 		String localAddress;
 		String endAddress = "kronkserver.tplinkdns.com";
+		String message;
+		Scanner in = new Scanner(System.in);
 		final int PORT = 55935;
 		try {
 			endAddress = InetAddress.getByName(endAddress).getHostAddress().toString();
 			localAddress = InetAddress.getLocalHost().getHostAddress();
 			System.out.println("Local Address: " + localAddress);
+			System.out.println("End address: " + endAddress);
 		} catch (Exception ex) {
 			System.out.println("Unable to determine address!");
 			return;
 		}
-		System.out.println("End address: " + endAddress); // Test to see end add
-		Socket server = connectSocket(endAddress, PORT);
 
-		if (server == null) {
-			System.out.println("No connection! Could the port be blocked?");
-			return;
+		System.out.println("Please enter a message:");
+		message = in.nextLine();
+		System.out.println("Message to send: " + message); // Echos message to be sent
+
+		while (!message.equals(":exit")) {
+			
+			message = in.nextLine();
+			sendMessage(endAddress, PORT, message);
 		}
 
-		try {
-			PrintWriter output = new PrintWriter(server.getOutputStream(), true);
-
-			output.println("balls");
-
-		} catch (Exception ex) {
-			System.out.println(ex);
-		}
 	}
 }
