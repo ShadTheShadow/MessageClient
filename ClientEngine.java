@@ -11,10 +11,16 @@ import java.net.InetSocketAddress;
  */
 public class ClientEngine {
 
+	/**
+	 * 
+	 * @param endAddress
+	 * @param PORT
+	 * @param message
+	 */
 	public static void sendMessage(String endAddress, int PORT, String message) {
 		Socket server = connectSocket(endAddress, PORT);
 		if (server == null) {
-			System.out.println("No connection! Could the port be blocked?");
+			System.out.println("Failed to send message! Could the port be blocked?");
 			return;
 		}
 
@@ -31,13 +37,15 @@ public class ClientEngine {
 		try {
 			server.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * TODO write header
+	 * TODO
+	 * @param endAddress
+	 * @param port
+	 * @return
 	 */
 	public static Socket connectSocket(String endAddress, int port) {
 		SocketAddress serverIp = new InetSocketAddress(endAddress, port);
@@ -65,7 +73,8 @@ public class ClientEngine {
 	}
 
 	/**
-	 * TODO write header
+	 * 
+	 * @param args
 	 */
 	public static void main(String[] args) {
 		String localAddress;
@@ -73,6 +82,8 @@ public class ClientEngine {
 		String message = "";
 		Scanner in = new Scanner(System.in);
 		final int PORT = 55935;
+
+		// fetch local and remote addresses
 		try {
 			endAddress = InetAddress.getByName(endAddress).getHostAddress().toString();
 			localAddress = InetAddress.getLocalHost().getHostAddress();
