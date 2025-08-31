@@ -49,7 +49,7 @@ public class MessageEngine {
 
 				//Writes message from client to txt file
 				FileWriter writer = new FileWriter("Recieved.txt");
-				writer.write(message);
+				writer.append(System.lineSeparator()).append(message);
 				writer.close();
 
                 // Send a response
