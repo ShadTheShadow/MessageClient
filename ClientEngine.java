@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import javax.crypto.*;
+import java.security.*;
 
 /**
  * 
@@ -74,15 +76,32 @@ public class ClientEngine {
 	}
 
 	public static boolean userAuth(String username, String password) {
+		// TODO authenticate with EXISTING key
 
 		return true;
 	}
 
 	public static boolean verifyCreds(String credential) {
+		// TODO make more robust
 		if (credential.length() > 0) {
 			return true;
 		}
 		return false;
+	}
+
+	public static void genAuthKeys(String username, String password) {
+
+		try {
+			//Declare key generator and generate key
+			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+			keyGen.initialize(4096);
+			KeyPair pair = keyGen.generateKeyPair();
+
+			PublicKey publicKey = pair.getPublic();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
 	}
 
 	/**
