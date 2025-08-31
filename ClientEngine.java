@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**
- * TODO write header
+ * 
  */
 public class ClientEngine {
 
@@ -33,7 +33,7 @@ public class ClientEngine {
 		} catch (Exception ex) {
 			System.out.println(ex);
 		}
-		
+
 		try {
 			server.close();
 		} catch (IOException e) {
@@ -43,9 +43,10 @@ public class ClientEngine {
 
 	/**
 	 * TODO
+	 * 
 	 * @param endAddress
 	 * @param port
-	 * @return
+	 * @return endpoint
 	 */
 	public static Socket connectSocket(String endAddress, int port) {
 		SocketAddress serverIp = new InetSocketAddress(endAddress, port);
@@ -72,6 +73,18 @@ public class ClientEngine {
 		return null; // returns null if connection failed
 	}
 
+	public static boolean userAuth(String username, String password) {
+
+		return true;
+	}
+
+	public static boolean verifyCreds(String credential) {
+		if (credential.length() > 0) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * 
 	 * @param args
@@ -80,6 +93,7 @@ public class ClientEngine {
 		String localAddress;
 		String endAddress = "kronkserver.tplinkdns.com";
 		String message = "";
+		boolean valid;
 		Scanner in = new Scanner(System.in);
 		final int PORT = 55935;
 
@@ -94,23 +108,57 @@ public class ClientEngine {
 			in.close();
 			return;
 		}
-		
+
+		String username = "";
+
+		do {
+			String password = "";
+
+			do {
+
+				System.out.println("Enter your username: ");
+
+				valid = true;
+
+				if (!valid) {
+					System.out.println("Invalid username, enter again:");
+
+				}
+				username = in.next();
+				valid = verifyCreds(username);
+			} while (!valid);
+
+			System.out.println("Enter your password: ");
+
+			do {
+				if (!valid) {
+					System.out.println("Invalid password, enter again:");
+				}
+				password = in.next();
+				valid = verifyCreds(password);
+			} while (!valid);
+
+			valid = userAuth(username, password);
+		} while (!valid);
+
+		System.out.println("Signed in as user " + username);
+
 		boolean exit = false;
 
 		while (!exit) {
-			
+
 			System.out.println("Please enter a message or type :exit to close:");
 			message = in.nextLine();
-			if(message.equals(":exit")) {
+			if (message.equals(":exit")) {
 				exit = true;
 				System.out.println("Exiting!");
 			} else {
 				System.out.println("Message to send: " + message); // Echos message to be sent
 				sendMessage(endAddress, PORT, message);
 			}
-			
+
 		}
-		
+
 		in.close();
 
 	}
