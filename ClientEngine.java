@@ -19,7 +19,7 @@ public class ClientEngine {
 	 * @param PORT
 	 * @param message
 	 */
-	public static void sendMessage(String endAddress, int PORT, String message) {
+	public static void sendMessage(String endAddress, int PORT, String message, String destUser) {
 		Socket server = connectSocket(endAddress, PORT);
 		if (server == null) {
 			System.out.println("Failed to send message! Could the port be blocked?");
@@ -29,7 +29,7 @@ public class ClientEngine {
 		try {
 			PrintWriter output = new PrintWriter(server.getOutputStream(), true);
 
-			output.println(message);
+			output.println(destUser + "|" + message);
 			output.close();
 
 		} catch (Exception ex) {
@@ -75,7 +75,7 @@ public class ClientEngine {
 		return null; // returns null if connection failed
 	}
 
-	public static boolean userAuth(String username, String password) {
+	public static boolean userAuth(String username, String password, String destination) {
 		// TODO authenticate with EXISTING key
 
 		return true;
@@ -89,6 +89,12 @@ public class ClientEngine {
 		return false;
 	}
 
+	/**
+	 * TODO WIP, for encryption
+	 * 
+	 * @param username
+	 * @param password
+	 */
 	public static void genAuthKeys(String username, String password) {
 
 		try {
@@ -157,14 +163,20 @@ public class ClientEngine {
 				valid = verifyCreds(password);
 			} while (!valid);
 
-			valid = userAuth(username, password);
+			valid = true; //TEMP -> userAuth(username, password);
 		} while (!valid);
 
 		System.out.println("Signed in as user " + username);
 
 		boolean exit = false;
 
+		String destUser;
+
 		while (!exit) {
+
+			System.out.println("Please specify destination username: (i.e. john)");
+			destUser = in.next();
+			in.nextLine(); // flush input
 
 			System.out.println("Please enter a message or type :exit to close:");
 			message = in.nextLine();
@@ -173,7 +185,13 @@ public class ClientEngine {
 				System.out.println("Exiting!");
 			} else {
 				System.out.println("Message to send: " + message); // Echos message to be sent
-				sendMessage(endAddress, PORT, message);
+
+				//TESTING
+				destUser = "evan";
+				message = "Hi Evan";
+				//TESTING
+				
+				sendMessage(endAddress, PORT, message, destUser);
 			}
 
 		}
