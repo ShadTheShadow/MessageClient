@@ -1,10 +1,13 @@
+
 /*
  * Created by Maxwell Weston and Evan Williams
  */
 import java.net.Socket; // for client side interactions
 import java.net.SocketAddress;
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -22,24 +25,55 @@ public class ClientEngine {
 	 * @param PORT
 	 * @param message
 	 */
-	public static void sendMessage(String endAddress, int PORT, String message, String destUser) {
+	public static void chatEngine(String endAddress, int PORT, String message, String username, String destUser) {
 		Socket server = connectSocket(endAddress, PORT);
 		if (server == null) {
 			System.out.println("Failed to send message! Could the port be blocked?");
 			return;
 		}
 
+		boolean connected = true;
+		String receivedMessage;
+
+		PrintWriter output = null;
+		BufferedReader input = null;
+
 		try {
-			PrintWriter output = new PrintWriter(server.getOutputStream(), true);
+			output = new PrintWriter(server.getOutputStream(), true);
+			input = new BufferedReader(
+					new InputStreamReader(server.getInputStream()));
 
-			output.println(destUser + "|" + message);
-			output.close();
+			// login whoami process
+			output.println(username);
+			System.out.println(input.readLine());
 
-		} catch (Exception ex) {
-			System.out.println(ex);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
+		// main message loop
+		while (connected) {
+
+			try {
+
+				if (message.length() > 0) {
+					output.println(destUser + "|" + message);
+				}
+
+				receivedMessage = input.readLine();
+				if (receivedMessage != null) {
+					System.out.println("Recieved: " + receivedMessage);
+				}
+
+			} catch (Exception ex) {
+				connected = false;
+				System.out.println("Exception occured, disconnected!");
+			}
 		}
 
 		try {
+			output.close();
+			input.close();
 			server.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -101,7 +135,7 @@ public class ClientEngine {
 	public static void genAuthKeys(String username, String password) {
 
 		try {
-			//Declare key generator and generate key
+			// Declare key generator and generate key
 			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 			keyGen.initialize(4096);
 			KeyPair pair = keyGen.generateKeyPair();
@@ -166,7 +200,7 @@ public class ClientEngine {
 				valid = verifyCreds(password);
 			} while (!valid);
 
-			valid = true; //TEMP -> userAuth(username, password);
+			valid = true; // TEMP -> userAuth(username, password);
 		} while (!valid);
 
 		System.out.println("Signed in as user " + username);
@@ -189,12 +223,11 @@ public class ClientEngine {
 			} else {
 				System.out.println("Message to send: " + message); // Echos message to be sent
 
-				//TESTING
-				destUser = "evan";
-				message = "Hi Evan";
-				//TESTING
+				// TESTING
 				
-				sendMessage(endAddress, PORT, message, destUser);
+				// TESTING
+
+				chatEngine(endAddress, PORT, message, username, destUser);
 			}
 
 		}
