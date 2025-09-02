@@ -66,7 +66,7 @@ public class MessageEngine {
 					if (msg.startsWith("LOGIN|")){
 						//reads 'LOGIN|username' format
 
-						String[] split = msg.split("|");
+						String[] split = msg.split("\\|");
 
 						String username = split[1];
 
@@ -76,7 +76,7 @@ public class MessageEngine {
 
 					}else if (msg.startsWith("MSG|")){
 						//reads 'MSG|username|message' format
-						String[] split = msg.split("|");
+						String[] split = msg.split("\\|");
 
 						String recipient = split[1];
 						String message = split[2];
