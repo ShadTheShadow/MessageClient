@@ -1,3 +1,6 @@
+/*
+ * Created by Maxwell Weston and Evan Williams
+ */
 import java.net.Socket; // for client side interactions
 import java.net.SocketAddress;
 import java.util.Scanner;
