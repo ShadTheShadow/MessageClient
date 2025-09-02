@@ -1,91 +1,100 @@
-import java.net.Socket; // for client side interactions
-import java.util.concurrent.ConcurrentHashMap;
-import java.net.ServerSocket; // for server side interactions
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.net.InetSocketAddress;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 public class MessageEngine {
 
-	private static int port = 55935;
+	private static final int PORT = 55935;
 
-	private static ConcurrentHashMap<String, PrintWriter> clients = new ConcurrentHashMap<>();
+	private static HashMap<String, SocketChannel> clients = new HashMap<>();
 
-	public static void main(String[] args) {
-
-
-		try (ServerSocket serverSocket = new ServerSocket(port);) {
-
-			System.out.println("Server is listening on port " + serverSocket.getLocalPort());
-
-			serverSocket.setReuseAddress(true);
-
-			while (true) {
-
-				Socket clientSocket = serverSocket.accept();
-				InetAddress clientAddress = clientSocket.getInetAddress();
+	public static void main(String[] args) throws IOException{
 
 
-				String clientIP = clientAddress.getHostAddress();
+		Selector selector = Selector.open();
+		ServerSocketChannel server = ServerSocketChannel.open();
+        server.bind(new InetSocketAddress(PORT));
+        server.configureBlocking(false);
+        server.register(selector, SelectionKey.OP_ACCEPT);
 
-				System.out.println("Client connected from " + clientIP);
+		System.out.println("Server is listening on " + server.getLocalAddress());
 
-				new Thread(new ClientHandler(clientSocket)).start();
+		//Main dummy pipe loop
+		while(true){
+			selector.select();
 
-			}
-		}catch(Exception e){
-			System.out.println(e);
-		}
-	}
+			//Iterates through available selectors
+			Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 
+            while (it.hasNext()) {
 
+                SelectionKey key = it.next();
+                it.remove();
 
-	public static class ClientHandler implements Runnable {
-		private Socket socket;
-        private String username;
-        private BufferedReader in;
-        private PrintWriter out;
+				//Checks the statuses of the keys (new connection / writable)
+				if (key.isAcceptable()){
 
+					SocketChannel client = server.accept();
+                    client.configureBlocking(false);
+                    client.register(selector, SelectionKey.OP_READ);
+                    System.out.println("New connection: " + client.getRemoteAddress());
 
-		public ClientHandler(Socket socket){
-			this.socket = socket;
-		}
+				}else if (key.isReadable()){
 
-		@Override
-		public void run() {
-			try{
-				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				out = new PrintWriter(socket.getOutputStream(), true);
+                    SocketChannel client = (SocketChannel) key.channel();
+                    ByteBuffer buffer = ByteBuffer.allocate(1024);
 
+                    int bytesRead = client.read(buffer);
+                    if (bytesRead == -1) {
+                        // client disconnected
+                        clients.values().remove(client);
+                        client.close();
+                        continue;
+					}
 
+					
+					buffer.flip();
 
-				out.println("Enter username: ");
+					String msg = new String(buffer.array(), 0, buffer.limit()).trim();
 
-				username = in.readLine();
+					if (msg.startsWith("LOGIN|")){
+						//reads 'LOGIN|username' format
 
-				clients.put(username, out);
+						String[] split = msg.split("|");
 
-				out.println("Welcome " + username + "! Type username|message to text somebody!");
+						String username = split[1];
 
-				
-				while(socket.isConnected()){
-					String message = in.readLine();
+						clients.put(username, client);
 
-					String[] split = message.split("|");
+						System.out.println("Registered " + username);
 
-					PrintWriter destOut = clients.get(split[0]);
+					}else if (msg.startsWith("MSG|")){
+						//reads 'MSG|username|message' format
+						String[] split = msg.split("|");
 
-					destOut.println(message);
+						String recipient = split[1];
+						String message = split[2];
+
+						SocketChannel dest = clients.get(recipient);
+						if (dest != null && dest.isOpen()){
+							dest.write(ByteBuffer.wrap(message.getBytes()));
+							System.out.println("Forwarded message to " + recipient);
+						}
+					}
+
 				}
 
+			}
 
-
-			}catch(Exception e){
-				System.out.println(e);
-;			}
 		}
 	}
-
 }
+
+	
+
