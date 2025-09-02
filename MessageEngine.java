@@ -1,4 +1,5 @@
 import java.net.Socket; // for client side interactions
+import java.util.concurrent.ConcurrentHashMap;
 import java.net.ServerSocket; // for server side interactions
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,13 +9,12 @@ import java.io.FileWriter;
 
 public class MessageEngine {
 
-	public static void serverAuth() {
+	private static int port = 55935;
 
-	}
+	private static ConcurrentHashMap<String, PrintWriter> clients = new ConcurrentHashMap<>();
 
 	public static void main(String[] args) {
 
-		int port = 55935;
 
 		try (ServerSocket serverSocket = new ServerSocket(port);) {
 
@@ -26,32 +26,66 @@ public class MessageEngine {
 
 				Socket clientSocket = serverSocket.accept();
 				InetAddress clientAddress = clientSocket.getInetAddress();
-				System.out.println("Client connected from " + clientAddress.getHostAddress());
 
-				// Authenticating client
-				
 
-				// Reading input from client
-				BufferedReader in = new BufferedReader(
-						new InputStreamReader(clientSocket.getInputStream()));
+				String clientIP = clientAddress.getHostAddress();
 
-				// Receive a message from the client
-				String message = in.readLine(); // Waits for new line
-				System.out.println("Received from client: " + message);
+				System.out.println("Client connected from " + clientIP);
 
-				// Writes message from client to txt file
-				FileWriter writer = new FileWriter("Recieved.txt");
-				writer.append(System.lineSeparator()).append(message);
-				writer.close();
+				new Thread(new ClientHandler(clientSocket)).start();
 
-				// Send a response
-				// out.println("I AM SERVER");
-
-				clientSocket.close();
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		}catch(Exception e){
+			System.out.println(e);
 		}
 	}
+
+
+
+	public static class ClientHandler implements Runnable {
+		private Socket socket;
+        private String username;
+        private BufferedReader in;
+        private PrintWriter out;
+
+
+		public ClientHandler(Socket socket){
+			this.socket = socket;
+		}
+
+		@Override
+		public void run() {
+			try{
+				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				out = new PrintWriter(socket.getOutputStream(), true);
+
+
+
+				out.println("Enter username: ");
+
+				username = in.readLine();
+
+				clients.put(username, out);
+
+				out.println("Welcome " + username + "! Type username|message to text somebody!");
+
+				
+				while(socket.isConnected()){
+					String message = in.readLine();
+
+					String[] split = message.split("|");
+
+					PrintWriter destOut = clients.get(split[0]);
+
+					destOut.println(message);
+				}
+
+
+
+			}catch(Exception e){
+				System.out.println(e);
+;			}
+		}
+	}
+
 }
