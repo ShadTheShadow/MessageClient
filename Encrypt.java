@@ -10,6 +10,7 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Scanner;
 import javax.crypto.Cipher;
 
@@ -90,9 +91,32 @@ public class Encrypt {
             return fullLogin;
     }
 
-    public static PublicKey decodeLogin(byte[] encodedKey) throws Exception{
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(encodedKey);
+    public static int getKeyIndex(byte[] fullLogin){
+        int keyIndex = 0;
+            for(int i = 0; i < fullLogin.length ; i++){
+                if((char)fullLogin[i] == '|'){
+                    keyIndex++;
+                }
+                if(keyIndex == 2){
+                    keyIndex = i + 1;
+                    break;
+                }
+            }
+            return keyIndex;
+    }
+
+    public static PublicKey decodeLogin(byte[] fullLogin){
+
+            byte[] isolatedArray = Arrays.copyOfRange(fullLogin, getKeyIndex(fullLogin), fullLogin.length);
+
+
+        try{
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(isolatedArray);
         KeyFactory keyFac = KeyFactory.getInstance("RSA");
         return keyFac.generatePublic(spec);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

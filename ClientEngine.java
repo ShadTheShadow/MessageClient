@@ -116,37 +116,24 @@ public class ClientEngine {
 		return attemptChannel;
 	}
 
-	public static boolean userAuth(String username, String password, String destination) {
-		// TODO authenticate with EXISTING key
 
-		return true;
-	}
-
-	public static boolean verifyCreds(String credential) {
-		// TODO make more robust
-		if (credential.length() > 0) {
-			return true;
-		}
-		return false;
-	}
 
 	/**
-	 * TODO WIP, for encryption
 	 * 
-	 * @param username
-	 * @param password
+	 * @return
 	 */
-	public static void genAuthKeys(String username, String password) {
+	public static KeyPair genAuthKeys() {
 
 		try {
 			// Declare key generator and generate key
-			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
-			keyGen.initialize(4096);
-			KeyPair pair = keyGen.generateKeyPair();
+			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+         keyGen.initialize(4096);
+         return keyGen.generateKeyPair();
 
-			PublicKey publicKey = pair.getPublic();
+
 		} catch (Exception e) {
 			System.out.println(e);
+			return null;
 		}
 
 	}
