@@ -1,3 +1,5 @@
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.net.InetSocketAddress;
@@ -7,12 +9,15 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 
 public class MessageEngine {
 
 	private static final int PORT = 55935;
 
 	private static HashMap<String, SocketChannel> clients = new HashMap<>();
+	public static HashMap<String, PublicKey> publicKeys = new HashMap<>();
 
 	public static void main(String[] args) throws IOException{
 
@@ -61,16 +66,31 @@ public class MessageEngine {
 					
 					buffer.flip();
 
+
+
+
+
+
+					byte[] data = buffer.array();
+					
 					String msg = new String(buffer.array(), 0, buffer.limit()).trim();
 
+
 					if (msg.startsWith("LOGIN|")){
-						//reads 'LOGIN|username' format
+						//reads 'LOGIN|username|publicKey' format
 
 						String[] split = msg.split("\\|");
 
 						String username = split[1];
 
+						int startIndex = split[0].length() + username.length() + 2; //+2 for pipe operators
+						
+						byte[] publicKey = Arrays.copyOfRange(data, startIndex, data.length-1);
+
+						System.out.println("PUBLIC KEY: " + publicKey);
+
 						clients.put(username, client);
+
 
 						System.out.println("Registered " + username);
 
