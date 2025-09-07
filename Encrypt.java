@@ -1,3 +1,8 @@
+/*
+ * This file is part of [MessageClient]
+ * Authors: Maxwell Weston and Evan Williams
+ * 
+ */
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -59,42 +64,5 @@ public class Encrypt {
             System.out.println(e);
             return null;
         }
-    }
-
-    /**
-     * Main function, used for testing of the methods.
-     * 
-     * @param args unused
-     */
-    public static void main(String[] args){
-        Scanner in = new Scanner(System.in);
-        String passW;
-
-        System.out.println("Enter password: ");
-        passW = in.next();
-
-
-        System.out.println("Pre-encrypt: " + passW);
-
-        
-        try{
-            //Gen key pair and encrypt password
-			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(4096);
-			KeyPair pair = keyGen.generateKeyPair();
-
-            byte[] encryptedPasW = encryptPass(passW, pair.getPublic());
-            System.out.println(new String(encryptedPasW, "UTF8"));
-
-
-            //use key pair to decrypt password
-            System.out.println("Decrypted password: " + new String(decryptPass(encryptedPasW, pair.getPrivate()), "UTF8"));
-        } catch (Exception e) {
-            System.out.println(e);
-
-        }
-
-        in.close();
-
     }
 }
