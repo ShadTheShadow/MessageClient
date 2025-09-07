@@ -79,16 +79,21 @@ public class MessageEngine {
 					if (msg.startsWith("LOGIN|")){
 
 						try{
+
+
 							//reads 'LOGIN|username|publicKey' format
+
+							
 							String[] split = msg.split("\\|");
 
 							String username = split[1];
 
-							int startIndex = split[0].length() + username.length() + 2; //+2 for pipe operators
+							//int startIndex = split[0].length() + username.length() + 2; //+2 for pipe operators
 							
-							byte[] publicKeyArray = Arrays.copyOfRange(data, startIndex, data.length-1);
+							//byte[] publicKeyArray = Arrays.copyOfRange(data, startIndex, data.length);
+							
 
-							PublicKey publicKey = Encrypt.decodeLogin(publicKeyArray);
+							PublicKey publicKey = Encrypt.decodeLogin(data);
 
 							System.out.println("PUBLIC KEY: " + publicKey.toString());
 
