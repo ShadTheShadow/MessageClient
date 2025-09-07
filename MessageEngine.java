@@ -77,22 +77,32 @@ public class MessageEngine {
 
 
 					if (msg.startsWith("LOGIN|")){
-						//reads 'LOGIN|username|publicKey' format
 
-						String[] split = msg.split("\\|");
+						try{
+							//reads 'LOGIN|username|publicKey' format
+							String[] split = msg.split("\\|");
 
-						String username = split[1];
+							String username = split[1];
 
-						int startIndex = split[0].length() + username.length() + 2; //+2 for pipe operators
-						
-						byte[] publicKey = Arrays.copyOfRange(data, startIndex, data.length-1);
+							int startIndex = split[0].length() + username.length() + 2; //+2 for pipe operators
+							
+							byte[] publicKeyArray = Arrays.copyOfRange(data, startIndex, data.length-1);
 
-						System.out.println("PUBLIC KEY: " + publicKey);
+							PublicKey publicKey = Encrypt.decodeLogin(publicKeyArray);
 
-						clients.put(username, client);
+							System.out.println("PUBLIC KEY: " + publicKey.toString());
+
+							clients.put(username, client);
+							publicKeys.put(username, publicKey);
 
 
-						System.out.println("Registered " + username);
+							System.out.println("Registered " + username);
+						}
+
+
+						catch (Exception e){
+							System.out.println("Login process failed");
+						}
 
 					}else if (msg.startsWith("MSG|")){
 						//reads 'MSG|username|message' format
