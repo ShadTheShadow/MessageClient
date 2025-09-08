@@ -6,8 +6,10 @@
  */
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 import java.util.Scanner;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class EncryptTest {
     public static void main(String[] args){
@@ -31,30 +33,22 @@ public class EncryptTest {
             byte[] pubEncodedKey = pair.getPublic().getEncoded();
             byte[] keyLength = ByteBuffer.allocate(4).putInt(pubEncodedKey.length).array();
 
-            byte[] fullLogin = new byte[toSend.length + pubEncodedKey.length + keyLength.length];
+            byte[] fullLogin = Encrypt.encodeLogin("max", pair.getPublic());
 
-            int logLength = 0;
+            PublicKey fart = Encrypt.decodeLogin(fullLogin);
 
-            for(int i = 0; i < fullLogin.length ; i++){
-                
-                if(i < toSend.length){
-                    fullLogin[i] = toSend[i];
-                } else if (i < keyLength.length + toSend.length) {
-                    fullLogin[i] = keyLength[i - toSend.length];
-                    logLength += fullLogin[i];
-                } else if (i < fullLogin.length + 1){
-                    fullLogin[i] = pubEncodedKey[i - toSend.length - keyLength.length];
-                } else {
-                    System.out.println("you did something wrong");
-                }
-                
-            }
+            System.out.print(fart.equals(pair.getPublic()));
+
+           
+
+          
+
+            
 
             for(int j = 0; j < fullLogin.length ; j++){
                 System.out.println(fullLogin[j]);
             }
 
-            System.out.println("Encoded key length: " + logLength);
             System.out.println("Encoded key  real length: " + pubEncodedKey.length);
 
             System.out.println("Public Key: " + pair.getPublic().getEncoded());
