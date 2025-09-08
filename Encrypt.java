@@ -4,10 +4,12 @@
  * 
  */
 import java.nio.ByteBuffer;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Scanner;
 import javax.crypto.Cipher;
 
@@ -86,5 +88,11 @@ public class Encrypt {
             }
 
             return fullLogin;
+    }
+
+    public static PublicKey decodeLogin(byte[] encodedKey) throws Exception{
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(encodedKey);
+        KeyFactory keyFac = KeyFactory.getInstance("RSA");
+        return keyFac.generatePublic(spec);
     }
 }

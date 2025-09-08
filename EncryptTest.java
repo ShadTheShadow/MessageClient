@@ -65,6 +65,11 @@ public class EncryptTest {
 
             //use key pair to decrypt password
             System.out.println("Decrypted password: " + new String(Encrypt.decryptPass(encryptedPasW, pair.getPrivate()), "UTF8"));
+
+            System.out.println("Pub key pre encode: " + pair.getPublic());
+
+            System.out.println("Pub key post encode: " + Encrypt.decodeLogin(pubEncodedKey));
+            
         } catch (Exception e) {
             System.out.println(e);
 
