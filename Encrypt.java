@@ -90,9 +90,14 @@ public class Encrypt {
             return fullLogin;
     }
 
-    public static PublicKey decodeLogin(byte[] encodedKey) throws Exception{
+    public static PublicKey decodeLogin(byte[] encodedKey){
+        try{
         X509EncodedKeySpec spec = new X509EncodedKeySpec(encodedKey);
         KeyFactory keyFac = KeyFactory.getInstance("RSA");
         return keyFac.generatePublic(spec);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
